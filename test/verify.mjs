@@ -17,7 +17,7 @@ import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { collectFacts, compareVersions, createAgent } from '../index.js'
+import { collectFacts, compareVersions, createAgent, normalizeConfig } from '../index.js'
 import { apply } from '../index.js'
 
 const TMP = join(tmpdir(), 'dsh-managed-agent-test')
@@ -87,6 +87,10 @@ async function unitTests() {
   chk('patch 指纹为文件 sha256', facts.patchFingerprint === expected, String(facts.patchFingerprint))
   chk('插件清单来自 profile（bundle + 依赖）', facts.plugins.length >= 2, JSON.stringify(facts.plugins.map((p) => p.name)))
   chk('上报内容不含工作区路径/提示词字段', !JSON.stringify(facts).match(/cwd|prompt|content|workspace/i))
+  const normalized = normalizeConfig({ heartbeatMinutes: 0, timeoutMs: 1e9, statusPath: 'nope' })
+  chk('配置归一化：范围钳制与路径兜底',
+    normalized.heartbeatMinutes === 1 && normalized.timeoutMs === 60_000 && normalized.statusPath === '/managed-agent/v1',
+    JSON.stringify(normalized))
   chk('版本比较：0.2.1-rc.3 > 0.2.0', compareVersions('0.2.1-rc.3', '0.2.0') === 1)
   chk('版本比较：0.2.0 < 0.2.1', compareVersions('0.2.0', '0.2.1') === -1)
 

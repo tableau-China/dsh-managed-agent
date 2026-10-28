@@ -1,6 +1,6 @@
 {
   "name": "dsh-managed-agent",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "受管设备代理（DSH 插件）：读取本机设备凭据，周期上报 DSH 版本 / patch 指纹 / 插件清单，并提供本地只读状态页。只上报状态与计数，不上报提示词、回复、文件内容或凭据。",
   "type": "module",
   "main": "index.js",

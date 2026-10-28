@@ -28,30 +28,38 @@ export const name = 'managed-agent'
 /** 需要宿主提供的能力：WebServer（挂本地只读状态页） */
 export const inject = ['webServer']
 
-export const Config = (z) =>
-  z
-    .object({
-      enabled: z.boolean().default(true),
-      /** 平台 API 前缀；留空则用凭据文件里的 endpoint */
-      endpoint: z.string().default(''),
-      /** 心跳周期（分钟），最小 1 */
-      heartbeatMinutes: z.number().min(1).max(1440).default(15),
-      /** 设备凭据文件；留空用 <DSH_HOME>/managed-agent.json */
-      deviceTokenFile: z.string().default(''),
-      /** patch 指纹来源；留空用 <DSH_HOME>/profiles/<profile>/cordis.patch.yml */
-      patchFile: z.string().default(''),
-      /** profile 名，默认 desktop */
-      profile: z.string().default(''),
-      /** 机器显示名，默认 hostname */
-      machineLabel: z.string().default(''),
-      /** DSH 版本；留空尝试环境变量，再退化为 unknown */
-      dshVersion: z.string().default(''),
-      /** 本地只读状态页前缀 */
-      statusPath: z.string().default('/managed-agent/v1'),
-      /** 单次请求超时（毫秒） */
-      timeoutMs: z.number().min(1000).max(60_000).default(10_000),
-    })
-    .describe('受管设备代理：周期上报版本/patch 指纹/插件清单，提供本地只读状态页')
+/**
+ * 配置归一化。
+ *
+ * 为什么不用 `export const Config = (z) => z.object(...)`：
+ *   本机 DSH 的 cordis 4 在 resolveConfig 里是这样读配置的 ——
+ *     `runtime.Config["~standard"].validate(config)`
+ *   也就是说 `Config` 必须是**一个 Standard Schema 对象**，而不是"接收 z 的工厂函数"。
+ *   写成工厂函数会让 `Config["~standard"]` 是 undefined，插件在加载阶段直接抛错（界面上显示"异常"）。
+ *   官方插件（如 @deepseek-ai/dsh-session-stats）与本机已装插件都**不导出 Config**，
+ *   所以这里也去掉它，改成在 apply 内部做默认值与范围约束 —— 少一层宿主契约，多一层自证。
+ */
+export function normalizeConfig(raw = {}) {
+  const text = (value, fallback = '') => (typeof value === 'string' ? value : fallback)
+  const integer = (value, fallback, min, max) => {
+    const parsed = Number(value)
+    if (!Number.isFinite(parsed)) return fallback
+    return Math.min(Math.max(Math.round(parsed), min), max)
+  }
+  const statusPath = text(raw.statusPath, '/managed-agent/v1').trim()
+  return {
+    enabled: raw.enabled !== false,
+    endpoint: text(raw.endpoint).trim(),
+    heartbeatMinutes: integer(raw.heartbeatMinutes, 15, 1, 1440),
+    deviceTokenFile: text(raw.deviceTokenFile),
+    patchFile: text(raw.patchFile),
+    profile: text(raw.profile),
+    machineLabel: text(raw.machineLabel),
+    dshVersion: text(raw.dshVersion),
+    statusPath: statusPath.startsWith('/') ? statusPath : '/managed-agent/v1',
+    timeoutMs: integer(raw.timeoutMs, 10_000, 1000, 60_000),
+  }
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 纯函数（可单独测试）
@@ -436,7 +444,8 @@ export function createAgent(ctx, config, { fetchImpl = globalThis.fetch } = {}) 
   return { state, tick, handle, statusSnapshot, statusHtml, loadCredential, paths: { credentialFile, pendingFile }, statusPath }
 }
 
-export function apply(ctx, config) {
+export function apply(ctx, rawConfig = {}) {
+  const config = normalizeConfig(rawConfig)
   if (!config.enabled) {
     ctx.logger?.info?.('[managed-agent] 已禁用')
     return

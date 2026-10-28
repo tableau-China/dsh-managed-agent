@@ -77,6 +77,21 @@
 | `statusPath` | `/managed-agent/v1` | 本地只读状态页前缀 |
 | `timeoutMs` | `10000` | 单次请求超时 |
 
+## 实现说明：为什么不导出 `Config`
+
+本机 DSH 的 cordis 4 在 `resolveConfig` 里是这样读插件配置的：
+
+```js
+runtime.Config["~standard"].validate(config)   // Config 必须是 Standard Schema 对象
+```
+
+写成 `export const Config = (z) => z.object(...)`（工厂函数）会让 `Config["~standard"]` 是
+`undefined`，插件在**加载阶段**就抛 `TypeError: Cannot read properties of undefined (reading 'validate')`，
+DSH 插件列表里显示"异常"。官方插件（如 `@deepseek-ai/dsh-session-stats`）与
+`dsh-workload-report` 都**不导出 Config**。
+
+所以本插件把默认值与范围约束放在内部的 `normalizeConfig()`，在 `apply` 里先归一化再使用。
+
 ## 与平台的契约
 
 ### 1. 设备凭据文件（`<DSH_HOME>/managed-agent.json`，0600）
