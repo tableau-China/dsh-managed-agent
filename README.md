@@ -1,5 +1,8 @@
 # dsh-managed-agent
 
+[![CI](https://github.com/tableau-China/dsh-managed-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/tableau-China/dsh-managed-agent/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > DeepSeek Harness（DSH）受管设备代理插件。
 > 把「这台机器在不在管、配置有没有被改、版本是不是落后」变成平台侧可见的事实，
 > 并在本机提供一个**只读**状态页。
