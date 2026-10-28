@@ -1,0 +1,13 @@
+# 把受管设备代理作为一行插入 profile 的 Loader。
+# 员工机上只需要这一个插件；平台地址与设备凭据来自 ~/.dsh/managed-agent.json
+# （由 `node admin/enroll.mjs` 生成，0600），不写进本 patch，避免配置漂移。
+- insert:
+    - id: managed-agent
+      name: dsh-managed-agent
+      config:
+        enabled: true
+        # 平台地址；留空则读 ~/.dsh/managed-agent.json 里的 endpoint
+        endpoint: ''
+        heartbeatMinutes: 15
+        # 本地只读状态页前缀（挂在 DSH 自带的 WebServer 上）
+        statusPath: /managed-agent/v1
