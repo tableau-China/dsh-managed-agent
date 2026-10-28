@@ -46,9 +46,13 @@
 #     config:
 #       indexes: ["http://dsh-admin.intra/api/v1/market/index.json"]
 
-# 方式三：本地 tgz
-#   npm pack && 在 profile 里 npm install /path/to/dsh-managed-agent-0.1.0.tgz
+# 方式三：直接从 GitHub Release 下载 tgz（不需要 npm 账号）
+curl -LO https://github.com/tableau-China/dsh-managed-agent/releases/download/v0.1.1/dsh-managed-agent-0.1.1.tgz
+#   然后在 profile 里 npm install /path/to/dsh-managed-agent-0.1.1.tgz
 ```
+
+> 公共 npm 上暂未发布（`npm publish` 需要维护者账号）。内网部署推荐用企业插件市场索引
+> 或上面的 tgz；对外开源用户也可以先下载 Release 里的 tgz。
 
 装好后重启 DSH，插件会在启动时上报一次，之后按 `heartbeatMinutes` 周期上报。
 
