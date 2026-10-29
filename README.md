@@ -31,28 +31,37 @@
 
 ## 安装
 
-插件以 DSH bundle 形式分发（`dsh.bundle.patch`），三种装法任选：
+插件以 DSH bundle 形式分发（`dsh.bundle.patch`）。**推荐从 npm 安装**：
 
 ```bash
-# 方式一：本地 link（开发/内网 tgz 分发均可）
-#   1) 放进 profile 的依赖
-#      "dsh-managed-agent": "link:/path/to/dsh-managed-agent"
-#   2) 加进 profile 的 dsh.profile.bundles 列表
-#   3) 建软链：ln -s /path/to/dsh-managed-agent ~/.dsh/profiles/<profile>/node_modules/dsh-managed-agent
-
-# 方式二：从企业插件市场索引安装（DSH 官方 Discover 页）
-#   profile 的 cordis.patch.yml 里配置内网索引：
-#   - id: plugin-market
-#     config:
-#       indexes: ["http://dsh-admin.intra/api/v1/market/index.json"]
-
-# 方式三：直接从 GitHub Release 下载 tgz（不需要 npm 账号）
-curl -LO https://github.com/tableau-China/dsh-managed-agent/releases/download/v0.2.1/dsh-managed-agent-0.2.1.tgz
-#   然后在 profile 里 npm install /path/to/dsh-managed-agent-0.2.1.tgz
+# 方式一（推荐）：从 npm 安装
+cd <DSH_HOME>/profiles/<profile>
+npm install dsh-managed-agent
+# 然后把 "dsh-managed-agent" 加进该 profile 的 dsh.profile.bundles 列表
 ```
 
-> 公共 npm 上暂未发布（`npm publish` 需要维护者账号）。内网部署推荐用企业插件市场索引
-> 或上面的 tgz；对外开源用户也可以先下载 Release 里的 tgz。
+```bash
+# 方式二：从 GitHub Release 下载 tgz（离线 / 内网镜像，不需要 npm 账号）
+curl -LO https://github.com/tableau-China/dsh-managed-agent/releases/latest/download/dsh-managed-agent-0.2.1.tgz
+npm install /path/to/dsh-managed-agent-0.2.1.tgz
+```
+
+```bash
+# 方式三：从源码本地 link（开发调试）
+#   profile 依赖里写 "dsh-managed-agent": "link:/path/to/dsh-managed-agent"
+#   并在 dsh.profile.bundles 里追加 "dsh-managed-agent"
+```
+
+```yaml
+# 无论哪种方式，装好后在 profile 的 cordis.patch.yml 里按 id 覆盖配置：
+- id: managed-agent
+  config:
+    enabled: true
+    heartbeatMinutes: 15
+```
+
+> 已发布到公共 npm：<https://www.npmjs.com/package/dsh-managed-agent>（`npm install dsh-managed-agent`）。
+> 内网部署也可用企业插件市场索引分发。
 
 装好后重启 DSH，插件会在启动时上报一次，之后按 `heartbeatMinutes` 周期上报。
 
