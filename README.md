@@ -47,8 +47,8 @@
 #       indexes: ["http://dsh-admin.intra/api/v1/market/index.json"]
 
 # 方式三：直接从 GitHub Release 下载 tgz（不需要 npm 账号）
-curl -LO https://github.com/tableau-China/dsh-managed-agent/releases/download/v0.1.1/dsh-managed-agent-0.1.1.tgz
-#   然后在 profile 里 npm install /path/to/dsh-managed-agent-0.1.1.tgz
+curl -LO https://github.com/tableau-China/dsh-managed-agent/releases/download/v0.2.1/dsh-managed-agent-0.2.1.tgz
+#   然后在 profile 里 npm install /path/to/dsh-managed-agent-0.2.1.tgz
 ```
 
 > 公共 npm 上暂未发布（`npm publish` 需要维护者账号）。内网部署推荐用企业插件市场索引
@@ -127,7 +127,7 @@ Content-Type: application/json
   "machineLabel": "dev-zhang.mbp",
   "dshVersion": "0.2.1-rc.3",
   "patchFingerprint": "sha256:…",
-  "plugins": [{ "name": "dsh-managed-agent", "version": "0.1.0" }],
+  "plugins": [{ "name": "dsh-managed-agent", "version": "0.2.1" }],
   "reportedAt": "2026-10-28T…Z"
 }
 ```
